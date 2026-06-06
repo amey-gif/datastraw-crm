@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Support CRM | Datastraw</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow px-6 py-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-blue-600">Datastraw CRM</h1>
+    <a href="/static/create.html"
+       class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
+      + New Ticket
+    </a>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-6xl mx-auto mt-8 px-4">
+
+    <!-- Search + Filter -->
+    <div class="bg-white rounded shadow p-4 mb-6 flex flex-col md:flex-row gap-4">
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="Search by name, email, ID, or description..."
+        class="flex-1 border border-gray-300 rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        oninput="loadTickets()"
+      />
+      <select
+        id="statusFilter"
+        class="border border-gray-300 rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        onchange="loadTickets()"
+      >
+        <option value="">All Status</option>
+        <option value="Open">Open</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Closed">Closed</option>
+      </select>
+    </div>
+
+    <!-- Tickets Table -->
+    <div class="bg-white rounded shadow overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+          <tr>
+            <th class="px-6 py-3 text-left">Ticket ID</th>
+            <th class="px-6 py-3 text-left">Customer</th>
+            <th class="px-6 py-3 text-left">Subject</th>
+            <th class="px-6 py-3 text-left">Status</th>
+            <th class="px-6 py-3 text-left">Created</th>
+            <th class="px-6 py-3 text-left">Action</th>
+          </tr>
+        </thead>
+        <tbody id="ticketTableBody" class="divide-y divide-gray-100">
+          <!-- Tickets loaded here by JS -->
+        </tbody>
+      </table>
+
+      <!-- Empty state -->
+      <div id="emptyState" class="hidden text-center py-16 text-gray-400">
+        <p class="text-lg">No tickets found</p>
+        <p class="text-sm mt-1">Create your first ticket to get started</p>
+      </div>
+    </div>
+
+    <!-- Ticket count -->
+    <p id="ticketCount" class="text-sm text-gray-500 mt-4"></p>
+
+  </div>
+
+  <script>
+    // Status badge colors
+    function getStatusBadge(status) {
+      const colors = {
+        "Open": "bg-red-100 text-red-700",
+        "In Progress": "bg-yellow-100 text-yellow-700",
+        "Closed": "bg-green-100 text-green-700"
+      };
+      return `<span class="px-2 py-1 rounded-full text-xs font-medium ${colors[status] || 'bg-gray-100 text-gray-600'}">${status}</span>`;
+    }
+
+    // Format date nicely
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-IN', {
+        day: '2-digit', month: 'short', year: 'numeric'
+      });
+    }
+
+    // Load tickets from API
+    async function loadTickets() {
+      const search = document.getElementById("searchInput").value;
+      const status = document.getElementById("statusFilter").value;
+
+      let url = "/api/tickets?";
+      if (status) url += `status=${encodeURIComponent(status)}&`;
+      if (search) url += `search=${encodeURIComponent(search)}`;
+
+      const response = await fetch(url);
+      const tickets = await response.json();
+
+      const tbody = document.getElementById("ticketTableBody");
+      const emptyState = document.getElementById("emptyState");
+      const ticketCount = document.getElementById("ticketCount");
+
+      if (tickets.length === 0) {
+        tbody.innerHTML = "";
+        emptyState.classList.remove("hidden");
+        ticketCount.textContent = "";
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+      ticketCount.textContent = `Showing ${tickets.length} ticket${tickets.length > 1 ? "s" : ""}`;
+
+      tbody.innerHTML = tickets.map(ticket => `
+        <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='/static/ticket.html?id=${ticket.ticket_id}'">
+          <td class="px-6 py-4 font-mono text-blue-600 font-medium">${ticket.ticket_id}</td>
+          <td class="px-6 py-4">${ticket.customer_name}</td>
+          <td class="px-6 py-4 max-w-xs truncate">${ticket.subject}</td>
+          <td class="px-6 py-4">${getStatusBadge(ticket.status)}</td>
+          <td class="px-6 py-4 text-gray-500">${formatDate(ticket.created_at)}</td>
+          <td class="px-6 py-4">
+            <a href="/static/ticket.html?id=${ticket.ticket_id}"
+               class="text-blue-600 hover:underline text-sm">View →</a>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    // Load tickets on page open
+    loadTickets();
+  </script>
+
+</body>
+</html>
