@@ -11,4 +11,7 @@ class UpdateTicket(BaseModel):
     status: Optional[str] = None
     note_text: Optional[str] = None
 
+class ReopenTicket(BaseModel):
+    note_text: Optional[str] = None
+
     

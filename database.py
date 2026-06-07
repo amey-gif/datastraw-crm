@@ -4,8 +4,9 @@ from datetime import datetime
 DATABASE = "crm.db"
 
 def get_db():
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE, timeout=10, check_same_thread=False)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL")
     return conn
 
 def init_db():
@@ -23,6 +24,7 @@ def init_db():
             subject TEXT NOT NULL,
             description TEXT NOT NULL,
             status TEXT DEFAULT 'Open',
+            reopen_count INTEGER DEFAULT 0,
             created_at TEXT DEFAULT (datetime('now')),
             updated_at TEXT DEFAULT (datetime('now'))  
         )

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from models import CreateTicket, UpdateTicket
+from models import CreateTicket, UpdateTicket, ReopenTicket
 from database import get_db, init_db, generate_ticket_id
 from datetime import datetime
 
@@ -112,7 +112,12 @@ def update_ticket(ticket_id: str, update: UpdateTicket):
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
-    # Update status if provided
+    if ticket["status"] == 'Closed':
+        raise HTTPException(status_code=400, detail='Ticket is closed. Use reopen endpoint instead')
+
+    old_status = ticket["status"]        
+
+    # Update status if provided and different
     if update.status:
         valid_statuses = ["Open", "In Progress", "Closed"]
         if update.status not in valid_statuses:
@@ -120,6 +125,12 @@ def update_ticket(ticket_id: str, update: UpdateTicket):
         cursor.execute("""
             UPDATE tickets SET status = ?, updated_at = ? WHERE ticket_id = ?
         """, (update.status, datetime.now().isoformat(), ticket_id))
+
+        # Auto note for status change
+        auto_note = f"Status changed: {old_status} → {update.status}"
+        cursor.execute("""
+            INSERT INTO notes (ticket_id, note_text) VALUES (?, ?)
+        """, (ticket_id, auto_note))
 
     # Add note if provided
     if update.note_text:
@@ -131,3 +142,50 @@ def update_ticket(ticket_id: str, update: UpdateTicket):
     conn.close()
 
     return {"success": True, "updated_at": datetime.now().isoformat()}
+
+
+
+# PUT /api/tickets/{ticket_id}/reopen — Reopen a closed ticket
+
+@app.put("/api/tickets/{ticket_id}/reopen")
+def reopen_ticket(ticket_id: str, reopen: ReopenTicket):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    # Check ticket exists
+    cursor.execute("SELECT * FROM tickets WHERE ticket_id = ?", (ticket_id,))
+    ticket = cursor.fetchone()
+
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+
+    # Only closed tickets can be reopened
+    if ticket["status"] != "Closed":
+        raise HTTPException(status_code=400, detail="Only closed tickets can be reopened.")
+
+    # Update status to Reopened + increment reopen_count
+    cursor.execute("""
+        UPDATE tickets 
+        SET status = 'Reopened', 
+            reopen_count = reopen_count + 1,
+            updated_at = ?
+        WHERE ticket_id = ?
+    """, (datetime.now().isoformat(), ticket_id))
+
+    # Auto system note
+    reopen_count = ticket["reopen_count"] + 1
+    auto_note = f"Ticket reopened (#{reopen_count}) on {datetime.now().strftime('%d %b %Y %H:%M')}"
+    cursor.execute("""
+        INSERT INTO notes (ticket_id, note_text) VALUES (?, ?)
+    """, (ticket_id, auto_note))
+
+    # Add manual note if provided
+    if reopen.note_text:
+        cursor.execute("""
+            INSERT INTO notes (ticket_id, note_text) VALUES (?, ?)
+        """, (ticket_id, reopen.note_text))
+
+    conn.commit()
+    conn.close()
+
+    return {"success": True, "status": "Reopened", "reopen_count": reopen_count}

@@ -45,72 +45,105 @@
         <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <p class="text-xs text-gray-500 uppercase font-medium">Customer Name</p>
-            <p id="customerName" class="text-gray-800 mt-1"></p>
+            <p id="customerName" class="text-gray-800 mt-1 font-semibold"></p>
           </div>
           <div>
             <p class="text-xs text-gray-500 uppercase font-medium">Customer Email</p>
-            <p id="customerEmail" class="text-gray-800 mt-1"></p>
+            <p id="customerEmail" class="text-gray-800 mt-1 font-semibold "></p>
           </div>
           <div>
             <p class="text-xs text-gray-500 uppercase font-medium">Created At</p>
-            <p id="createdAt" class="text-gray-800 mt-1"></p>
+            <p id="createdAt" class="text-gray-800 mt-1 font-semibold "></p>
           </div>
           <div>
             <p class="text-xs text-gray-500 uppercase font-medium">Last Updated</p>
-            <p id="updatedAt" class="text-gray-800 mt-1"></p>
+            <p id="updatedAt" class="text-gray-800 mt-1 font-semibold "></p>
           </div>
         </div>
 
         <!-- Description -->
         <div class="mt-6">
-          <p class="text-xs text-gray-500 uppercase font-medium">Issue Description</p>
-          <p id="ticketDescription" class="text-gray-800 mt-2 leading-relaxed"></p>
+          <p class="text-xs text-gray-500 uppercase font-semibold">Issue Description</p>
+          <p id="ticketDescription" class="text-gray-800 mt-2 leading-relaxed font-semibold "></p>
         </div>
       </div>
 
       <!-- Update Status -->
       <div class="bg-white rounded shadow p-6 mb-6">
-        <h3 class="text-base font-semibold text-gray-800 mb-4">Update Ticket</h3>
+          <h3 class="text-base font-semibold text-gray-800 mb-4">Update Ticket</h3>
 
-        <!-- Success/Error messages -->
-        <div id="updateSuccess" class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4 text-sm">
-          ✅ Ticket updated successfully!
-        </div>
-        <div id="updateError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 text-sm">
-        </div>
+          <!-- Success/Error messages -->
+          <div id="updateSuccess" class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-4 text-sm">
+            ✅ Ticket updated successfully!
+          </div>
+          <div id="reopenSuccess" class="hidden bg-purple-50 border border-purple-200 text-purple-700 px-4 py-3 rounded mb-4 text-sm">
+            🔄 Ticket reopened successfully!
+          </div>
+          <div id="updateError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+          </div>
 
-        <!-- Status dropdown -->
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Change Status</label>
-          <select
-            id="statusSelect"
-            class="w-full md:w-64 border border-gray-300 rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            <option value="Open">Open</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Closed">Closed</option>
-          </select>
-        </div>
+          <!-- Normal update form — hidden when ticket is Closed -->
+          <div id="normalUpdate">
+            <!-- Status dropdown -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Change Status</label>
+              <select
+                id="statusSelect"
+                class="w-full md:w-64 border border-gray-300 rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              >
+                <option value="Open">Open</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
 
-        <!-- Add note -->
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Add Note</label>
-          <textarea
-            id="noteInput"
-            rows="3"
-            placeholder="e.g. Refund initiated, replacement shipped..."
-            class="w-full border border-gray-300 rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
-          ></textarea>
-        </div>
+            <!-- Add note -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Add Note</label>
+              <textarea
+                id="noteInput"
+                rows="3"
+                placeholder="e.g. Refund initiated, replacement shipped..."
+                class="w-full border border-gray-300 rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+              ></textarea>
+            </div>
 
-        <button
-          onclick="updateTicket()"
-          id="updateBtn"
-          class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 text-sm font-medium"
-        >
-          Update Ticket
-        </button>
-      </div>
+            <button
+              onclick="updateTicket()"
+              id="updateBtn"
+              class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 text-sm font-medium"
+            >
+              Update Ticket
+            </button>
+          </div>
+
+          <!-- Reopen section — only shown when ticket is Closed -->
+          <div id="reopenSection" class="hidden">
+            <div class="bg-purple-50 border border-purple-200 rounded p-4 mb-4">
+              <p class="text-sm text-purple-700 font-medium">🔒 This ticket is closed.</p>
+              <p class="text-sm text-purple-600 mt-1">If the issue persists, you can reopen it below.</p>
+            </div>
+
+            <!-- Reopen note -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Reason for Reopening</label>
+              <textarea
+                id="reopenNote"
+                rows="3"
+                placeholder="e.g. Customer reported the same issue again..."
+                class="w-full border border-gray-300 rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+              ></textarea>
+            </div>
+
+            <button
+              onclick="reopenTicket()"
+              id="reopenBtn"
+              class="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 text-sm font-medium"
+            >
+              Reopen Ticket
+            </button>
+          </div>
+        </div>
 
       <!-- Notes History -->
       <div class="bg-white rounded shadow p-6">
@@ -134,7 +167,8 @@
       const colors = {
         "Open": "bg-red-100 text-red-700",
         "In Progress": "bg-yellow-100 text-yellow-700",
-        "Closed": "bg-green-100 text-green-700"
+        "Closed": "bg-green-100 text-green-700",
+        "Reopened": "bg-purple-100 text-purple-700"
       };
       return colors[status] || "bg-gray-100 text-gray-600";
     }
@@ -187,6 +221,21 @@
 
         // Set current status in dropdown
         document.getElementById("statusSelect").value = ticket.status;
+
+        // Show reopen section if closed, hide normal update
+        if (ticket.status === "Closed") {
+          document.getElementById("normalUpdate").classList.add("hidden");
+          document.getElementById("reopenSection").classList.remove("hidden");
+        } else {
+          document.getElementById("normalUpdate").classList.remove("hidden");
+          document.getElementById("reopenSection").classList.add("hidden");
+        }
+
+        // Show reopen count if reopened before
+        if (ticket.reopen_count > 0) {
+          document.getElementById("ticketIdLabel").textContent = 
+            `${ticket.ticket_id} • Reopened ${ticket.reopen_count} time${ticket.reopen_count > 1 ? "s" : ""}`;
+        }
 
         // Load notes
         renderNotes(ticket.notes);
@@ -251,18 +300,62 @@
             loadTicket();
           }, 1500);
         } else {
-          errorMsg.textContent = "❌ " + (data.detail || "Update failed.");
+          errorMsg.textContent = "" + (data.detail || "Update failed.");
           errorMsg.classList.remove("hidden");
         }
 
       } catch (err) {
-        errorMsg.textContent = "❌ Network error. Please try again.";
+        errorMsg.textContent = "Network error. Please try again.";
         errorMsg.classList.remove("hidden");
       } finally {
         updateBtn.disabled = false;
         updateBtn.textContent = "Update Ticket";
       }
     }
+
+    // Reopen ticket
+    async function reopenTicket() {
+      const note_text = document.getElementById("reopenNote").value.trim();
+      const reopenBtn = document.getElementById("reopenBtn");
+      const successMsg = document.getElementById("reopenSuccess");
+      const errorMsg = document.getElementById("updateError");
+
+      // Reset messages
+      successMsg.classList.add("hidden");
+      errorMsg.classList.add("hidden");
+
+      reopenBtn.disabled = true;
+      reopenBtn.textContent = "Reopening...";
+
+      try {
+        const response = await fetch(`/api/tickets/${ticketId}/reopen`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ note_text: note_text || null })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          successMsg.classList.remove("hidden");
+          setTimeout(() => {
+            successMsg.classList.add("hidden");
+            loadTicket();
+          }, 1500);
+        } else {
+          errorMsg.textContent = "" + (data.detail || "Reopen failed.");
+          errorMsg.classList.remove("hidden");
+        }
+
+      } catch (err) {
+        errorMsg.textContent = "Network error. Please try again.";
+        errorMsg.classList.remove("hidden");
+      } finally {
+        reopenBtn.disabled = false;
+        reopenBtn.textContent = "Reopen Ticket";
+      }
+    }
+
 
     // Load on page open
     loadTicket();
