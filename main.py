@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse
 from models import CreateTicket, UpdateTicket, ReopenTicket
 from database import get_db, init_db, generate_ticket_id
 from datetime import datetime
+import os
 
 app = FastAPI()
 

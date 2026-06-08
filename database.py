@@ -1,7 +1,8 @@
 import sqlite3
+import os
 from datetime import datetime
 
-DATABASE = "crm.db"
+DATABASE = os.environ.get("DATABASE_URL","crm.db")
 
 def get_db():
     conn = sqlite3.connect(DATABASE, timeout=10, check_same_thread=False)
