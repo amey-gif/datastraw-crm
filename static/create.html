@@ -120,7 +120,7 @@
 
       // Basic validation
       if (!customer_name || !customer_email || !subject || !description) {
-        errorMsg.textContent = "❌ All fields are required.";
+        errorMsg.textContent = "All fields are required.";
         errorMsg.classList.remove("hidden");
         return;
       }
@@ -128,7 +128,7 @@
       // Email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(customer_email)) {
-        errorMsg.textContent = "❌ Please enter a valid email address.";
+        errorMsg.textContent = "Please enter a valid email address.";
         errorMsg.classList.remove("hidden");
         return;
       }
@@ -151,14 +151,14 @@
           // Redirect to home after 1.5 seconds
           setTimeout(() => window.location.href = "/", 1500);
         } else {
-          errorMsg.textContent = "❌ Error: " + (data.detail || "Something went wrong.");
+          errorMsg.textContent = "Error: " + (data.detail || "Something went wrong.");
           errorMsg.classList.remove("hidden");
           submitBtn.disabled = false;
           submitBtn.textContent = "Create Ticket";
         }
 
       } catch (err) {
-        errorMsg.textContent = "❌ Network error. Please try again.";
+        errorMsg.textContent = "Network error. Please try again.";
         errorMsg.classList.remove("hidden");
         submitBtn.disabled = false;
         submitBtn.textContent = "Create Ticket";
